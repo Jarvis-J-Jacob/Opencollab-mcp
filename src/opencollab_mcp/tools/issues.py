@@ -191,6 +191,13 @@ def register(mcp: MCPServer) -> None:
         except Exception as e:
             return handle_github_error(e)
 
+        # The issues endpoint also serves pull requests; planning a PR for a
+        # PR makes no sense.
+        if issue.get("pull_request"):
+            return json.dumps(
+                {"error": f"#{issue_num} is a pull request, not an issue"}, indent=2
+            )
+
         comments = [
             {
                 "author": c.get("user", {}).get("login", "unknown"),

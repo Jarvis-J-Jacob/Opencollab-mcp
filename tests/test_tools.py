@@ -218,3 +218,27 @@ async def test_generate_pr_plan_finds_contributing_in_dot_github(mock_github):
 
     parsed = json.loads(_extract_text(result))
     assert parsed["contributing_guidelines_preview"] == "Test guidelines"
+
+
+@pytest.mark.asyncio
+async def test_generate_pr_plan_rejects_pull_request_number(mock_github):
+    # The issues endpoint serves PRs too; they carry a `pull_request` key.
+    mock_github({
+        "/repos/o/r/issues/7": {
+            "title": "Fix thing",
+            "state": "open",
+            "pull_request": {"url": "https://api.github.com/repos/o/r/pulls/7"},
+        },
+        "/repos/o/r/issues/7/comments": [],
+        "/repos/o/r": {"language": "Python", "default_branch": "main"},
+        "/repos/o/r/contents": [],
+    })
+
+    result = await _call_tool_compat(
+        build_server(),
+        "opencollab_generate_pr_plan",
+        {"params": {"owner": "o", "repo": "r", "issue_number": "7"}},
+    )
+
+    parsed = json.loads(_extract_text(result))
+    assert parsed == {"error": "#7 is a pull request, not an issue"}
