@@ -191,8 +191,8 @@ def register(mcp: MCPServer) -> None:
         except Exception as e:
             return handle_github_error(e)
 
-        # The issues endpoint also serves pull requests; planning a PR for a
-        # PR makes no sense.
+        # The issues endpoint also serves pull requests; reject them, as
+        # opencollab_check_issue_availability does.
         if issue.get("pull_request"):
             return json.dumps(
                 {"error": f"#{issue_num} is a pull request, not an issue"}, indent=2

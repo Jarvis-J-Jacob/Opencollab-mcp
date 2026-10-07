@@ -223,6 +223,8 @@ async def test_generate_pr_plan_finds_contributing_in_dot_github(mock_github):
 @pytest.mark.asyncio
 async def test_generate_pr_plan_rejects_pull_request_number(mock_github):
     # The issues endpoint serves PRs too; they carry a `pull_request` key.
+    # The other routes make the pre-fix code return a full plan, so this test
+    # fails without the guard.
     mock_github({
         "/repos/o/r/issues/7": {
             "title": "Fix thing",
